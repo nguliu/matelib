@@ -34,7 +34,6 @@ namespace lfp
 			void finish();
 
 			LogStream stream_;
-		private:
 			int line_;
 			std::string basename_; //这里保存的只是文件名，不含路径
 		};
@@ -50,11 +49,18 @@ namespace lfp
 
 
 //设置异步日志属性
-#define SET_ASYNCLOG_BASENAME(name) Singleton<AsyncLogging>::instance().setBaseName(name)
-#define SET_ASYNCLOG_ROLLSIZE(size) Singleton<AsyncLogging>::instance().setRollSize(size)
+#define SET_ASYNCLOG_BASENAME(name)  Singleton<AsyncLogging>::instance().setBaseName(name)
+#define SET_ASYNCLOG_ROLLSIZE(size)  Singleton<AsyncLogging>::instance().setRollSize(size)
 //停止异步日志线程
 #define ASYNCLOG_STOP Singleton<AsyncLogging>::instance().stop()
 
 } //end of namespace lfp
 
 #endif //end of WEBSERVER_BASE_LOGGING_H
+
+
+
+/*
+待改进的不完美的地方：在前端线程格式化数据到缓冲区时进行了一次内存拷贝，在将前端数据送入后端线程时又会进行一次内存拷贝
+					  第一次拷贝不可避免，第二次拷贝留做优化
+*/

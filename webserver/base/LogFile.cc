@@ -59,7 +59,8 @@ namespace lfp
 	private:
 		size_t write_unlocked(const char* data, size_t len)
 		{
-			return ::fwrite_unlocked(data, 1, len, fp_);
+			return ::fwrite_unlocked(data, 1, len, fp_);  //写入len个单位长度为1的单元，返回写入的单元数
+
 			//这里没有采用线程安全的fwrite，而是采用了效率更高的非线程安全的写入方式，因为线程
 			//安全性已由LogFile的threadSafe参数保证，这里没必要在使用线程安全的方法
 		}
@@ -123,9 +124,12 @@ void LogFile::append_unlocked(const char* data, int len)
 {
 	file_->append(data, len);
 
+//	printf("LogFile::append: file_->writtenBytes() = %d\n", static_cast<int>(file_->writtenBytes()));
+
 	if (file_->writtenBytes() > rollSize_) {
 		rollFile();
 		count_ = 0;
+//		printf("RollFile, rollSize = %d\n", static_cast<int>(rollSize_));
 	}
 	else {
 		++count_;

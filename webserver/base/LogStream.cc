@@ -61,6 +61,17 @@ namespace detial
 
 using namespace lfp;
 
+//格式化int型数据到缓冲区
+template<typename T>
+void LogStream::formatInterger(T v)
+{
+	// buffer容不下kMaxNumericSize个字符的话会被直接丢弃
+	if (buffer_.avail() >= kMaxNumericSize) {
+		size_t len = detial::convertInt(buffer_.current(), v);
+		buffer_.add(len);
+	}
+}
+
 LogStream& LogStream::operator<<(short v)
 {
 	*this << static_cast<int>(v);
@@ -127,15 +138,4 @@ LogStream& LogStream::operator<<(const void* p)
 		buffer_.add(len + 2);
 	}
 	return *this;
-}
-
-//格式化int型数据到缓冲区
-template<typename T>
-void LogStream::formatInterger(T v)
-{
-	// buffer容不下kMaxNumericSize个字符的话会被直接丢弃
-	if (buffer_.avail() >= kMaxNumericSize) {
-		size_t len = detial::convertInt(buffer_.current(), v);
-		buffer_.add(len);
-	}
 }

@@ -34,7 +34,8 @@ AsyncLogging::AsyncLogging(const std::string& basename,
 	}
 }
 
-//供前端生产者线程调用（将日志数据写到应用层缓冲区中）
+//这里会有一次内存拷贝
+//供前端生产者线程调用（将数据从前端线程格式化缓冲区拷贝到后端线程应用层缓冲区）
 void AsyncLogging::append(const char* data, int len)
 {
 	MutexLockGuard lock(mutex_);  //生产者线程与消费者线程互斥访问缓冲区

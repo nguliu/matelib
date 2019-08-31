@@ -85,7 +85,8 @@ Logger::Logger(const char* file, int line, bool isAsync)
   : impl_(file, line),
   	isAsync_(isAsync)
 {
-	//异步日志和同步日志的以上步骤均相同，仅写入文件时的操作不同
+	//在以上格式化的过程中，所有的数据都会在调用FixedBuffer::append时被拷贝一次，
+	//此时是拷贝到前端线程的格式化缓冲区中，这一次拷贝无法避免。
 }
 
 
@@ -96,6 +97,9 @@ Logger::~Logger()
 
 	if (isAsync_) {  //异步写入
 		Singleton<AsyncLogging>::instance().append(buf.data(), buf.length());
+
+		//这里又会有一次内存拷贝，这里是从前端线程的格式化缓冲区拷贝到后端线程的应用层缓冲区
+		//这一次拷贝可以避免，留做优化。
 	}
 	else {  //同步写入
 		detail::g_output(buf.data(), buf.length());

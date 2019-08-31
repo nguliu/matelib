@@ -16,7 +16,7 @@ namespace detail
 	const int kSmallBuffer = 4096;			// 4K
 	const int kLargeBuffer = 4096 * 1024;	// 4M
 
-	//日志应用层缓冲区。非类型模板参数，指定缓冲区大小
+	//日志应用层缓冲区。非类型模板参数指定缓冲区大小
 	template<int SIZE>
 	class FixedBuffer : noncopyable
 	{
