@@ -25,6 +25,12 @@ namespace detail
 
 } //end of namespace detail
 
+__thread char t_time[32];			//保存当前线程格式化的时间（年.月.日-时.分.秒）
+__thread time_t t_lastCache = 0;	//上一次格式化时间的秒
+
+//这里有一个技巧：在一秒内写入两条日志时，秒及以上的时间都不用再次格式化，因为在一秒之内
+//它们肯定都没有变，在前端线程日志量巨大是对性能有极大地提升。（亲自体会过，血淋淋的教训）
+
 } //end of namespace lfp
 
 
@@ -46,24 +52,26 @@ Logger::Impl::Impl(const char* file, int line)
 	}
 
 	formatTime();  //格式化时间到缓冲区
-	CurrentThread::tid();
 	stream_ << CurrentThread::tidString(); //格式化线程ID到缓冲区
 }
 
 void Logger::Impl::formatTime()
 {
-	char buf[32];
-	memset(buf, 0, sizeof buf);
-
 	struct timeval tv;
-	gettimeofday(&tv, nullptr);
-	time_t time = tv.tv_sec;
-	int microseconds = static_cast<int>(tv.tv_usec);
+	::gettimeofday(&tv, nullptr);
+	time_t sec = tv.tv_sec;
+	int usec = static_cast<int>(tv.tv_usec);
 
-	struct tm* ptm = localtime(&time);
-	strftime(buf, sizeof buf, "%Y.%m.%d-%H:%M:%S", ptm);
-    stream_ << buf;
-	snprintf(buf, sizeof buf, ".%06d ", microseconds);
+	//如果是新的1秒才格式化秒及以上时间
+	if (t_lastCache != sec) {
+		t_lastCache = sec;
+		struct tm* ptm = localtime(&sec);
+		strftime(t_time, sizeof t_time, "%Y.%m.%d-%H:%M:%S", ptm);
+	}
+    stream_ << t_time;
+	
+	char buf[16];
+	snprintf(buf, sizeof buf, ".%06d ", usec);
 	stream_ << buf;	
 }
 
