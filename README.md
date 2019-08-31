@@ -1,6 +1,6 @@
 # HighPerformance-server
-本项目为C++编写的静态Web服务器
+本项目为C++编写的静态Web服务器，在实现的过程中大量参考了muduo网络库的实现
 
 | Part Ⅰ | Part Ⅱ | Part Ⅲ | Part Ⅳ | Part Ⅴ | Part Ⅵ |
 | :--------: | :---------: | :---------: | :---------: | :---------: | :---------: |
-| [关键点概述](https://github.com/Canna011/HighPerformance-server/blob/master/%E5%85%B3%E9%94%AE%E7%82%B9%E6%A6%82%E8%BF%B0)|[连接的维护](https://github.com/linyacool/WebServer/blob/master/连接的维护.md)|[版本历史](https://github.com/linyacool/WebServer/blob/master/%E7%89%88%E6%9C%AC%E5%8E%86%E5%8F%B2.md) | [测试及改进](https://github.com/linyacool/WebServer/blob/master/测试及改进.md) | [项目目的](https://github.com/linyacool/WebServer/blob/master/%E9%A1%B9%E7%9B%AE%E7%9B%AE%E7%9A%84.md) | [面试问题](https://github.com/linyacool/WebServer/blob/master/%E9%9D%A2%E8%AF%95%E9%97%AE%E9%A2%98.md)
+| [并发模型](https://github.com/Canna011/HighPerformance-server/blob/master/%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B)|[连接处理](https://github.com/Canna011/HighPerformance-server/blob/master/%E8%BF%9E%E6%8E%A5%E5%A4%84%E7%90%86)|[网络IO](https://github.com/Canna011/HighPerformance-server/blob/master/%E7%BD%91%E7%BB%9CIO) | [测试与改进](https://github.com/Canna011/HighPerformance-server/blob/master/%E6%B5%8B%E8%AF%95%E4%B8%8E%E6%94%B9%E8%BF%9B)
