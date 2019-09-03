@@ -25,6 +25,9 @@ namespace CurrentThread
 
 	inline const char* tidString()
 	{
+		if (t_cachedTid == 0) {
+			cachedId();
+		}
 		return t_tidString;
 	}
 

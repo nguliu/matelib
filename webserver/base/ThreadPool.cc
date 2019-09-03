@@ -32,7 +32,7 @@ void ThreadPool::start()
 	//创建threadNum_个Thread对象保存到threads_
 	for (int i = 0; i < threadNum_; ++i) {
 		char buf[32];
-		snprintf(buf, sizeof buf, "-Thread%d", i);
+		snprintf(buf, sizeof buf, "-thread%d", i);
 
 		threads_.push_back(std::unique_ptr<Thread>(
 			new Thread(std::bind(&ThreadPool::runInThread, this), name_ + buf)));

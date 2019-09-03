@@ -15,7 +15,7 @@ namespace lfp
 	// 用户选择性的设置是否需要保证线程安全，兼顾了效率和灵活性
 	class File;  //前向声明
 
-	class LogFile : public noncopyable
+	class LogFile : noncopyable
 	{
 	public:
 		LogFile(const std::string& basename,

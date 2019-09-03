@@ -10,15 +10,9 @@
 using namespace lfp;
 
 
-off_t kRollSize = 100 * 1024 * 1024;  //日志文件滚动大小为100M
-AsyncLogging* g_asyncLog = NULL;
+off_t kRollSize = 300 * 1024 * 1024;  //日志文件滚动大小为300M
+CountDownLatch latch(5);
 
-CountDownLatch latch(4);
-
-
-void asyncOutput(const char* msg, int len) {
-    g_asyncLog->append(msg, len);
-}
 
 void bench() {
     const int time = 10 * 10000;
@@ -29,12 +23,12 @@ void bench() {
 		Timestamp start = Timestamp::now();
 		for (int k = 0; k < time; ++k) {
 			++cnt;
-			//注意这里是通过修改同步日志的输出函数使用了异步日志，并不是直接使用异步日志
-			SYNC_LOG << "Hello 0123456789" << " abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ " << cnt;
+			//这里直接使用异步日志
+			ASYNC_LOG << "Hello 0123456789" << " abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ " << cnt;
 		}
 		Timestamp end = Timestamp::now();
 
-		printf("%f us / 次\n", timeDifference(end, start) * 1000000 / time);
+		//printf("%f us / 次\n", timeDifference(end, start) * 1000000 / time);
 	}
 
 	latch.countDown();
@@ -43,17 +37,14 @@ void bench() {
 int main(int argc, char* argv[])
 {
 	{
-		// set max virtual memory to 3GB.
+		// set max virtual memory to 2GB.
 		size_t kOneGB = 1000*1024*1024;
-		rlimit rl = { 3 * kOneGB, 3 * kOneGB };
+		rlimit rl = { 2 * kOneGB, 2 * kOneGB };
 		setrlimit(RLIMIT_AS, &rl);
 	}
 
-	Logger::setOutput(asyncOutput);
-    
-	AsyncLogging asyncLog("asynclog_bench", kRollSize);
-    g_asyncLog = &asyncLog;
-	asyncLog.start();
+	SET_ASYNCLOG_BASENAME("asynclog_bench2");
+	SET_ASYNCLOG_ROLLSIZE(kRollSize);  //设置日志文件滚动大小为300M
 
 	ThreadPool tPool(5);  //5个生产者线程
 	tPool.start();
@@ -70,8 +61,8 @@ int main(int argc, char* argv[])
 	tPool.stop();
     printf("Make over, all use %fs\n", timeDifference(end, start));
 	
-	sleep(2);  //等待后台线程写完
-    asyncLog.stop();
+	sleep(1);  //等待后台线程写完
+	ASYNCLOG_STOP;
 
     printf("All over!\n");
 }

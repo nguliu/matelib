@@ -52,7 +52,7 @@ Logger::Impl::Impl(const char* file, int line)
 	}
 
 	formatTime();  //格式化时间到缓冲区
-	stream_ << CurrentThread::tidString(); //格式化线程ID到缓冲区
+	stream_ << CurrentThread::tidString() << ">>>"; //格式化线程ID到缓冲区
 }
 
 void Logger::Impl::formatTime()
