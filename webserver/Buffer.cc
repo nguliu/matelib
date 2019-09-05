@@ -7,8 +7,6 @@
 
 using namespace lfp;
 
-const size_t Buffer::kCheapPrepend;
-const size_t Buffer::kInitialSize;
 const char Buffer::kCRLF[] = "\r\n";
 
 
@@ -32,7 +30,8 @@ ssize_t Buffer::readFd(int fd, int* savedErrno)
     const ssize_t n = ::readv(fd, vec, 2);
 
     if (n < 0) {
-        *savedErrno = errno;
+		if (savedErrno)
+			*savedErrno = errno;
     }
     else if (n <= static_cast<ssize_t>(writable))	//第一块缓冲区足够容纳
     {
@@ -54,7 +53,7 @@ void Buffer::ensureWritableBytes(size_t len)
 		if (writableBytes() + prependableBytes() < len + kCheapPrepend)
 		{
 			//如果所有空闲区域都不够则直接扩大
-			buffer_.resize(writeIndex_+len);
+			buffer_.resize(writeIndex_ + len);
 		}
 		else {
 			//否则将数据向前移动

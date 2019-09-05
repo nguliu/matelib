@@ -66,7 +66,7 @@ namespace lfp
 			return crlf == beginWrite() ? nullptr : crlf;
 		}
 
-		void retrieveN(size_t n) {
+		void retrieve(size_t n) {
 			assert(n <= readableBytes());
 
 			if (n < readableBytes()) {
@@ -81,19 +81,22 @@ namespace lfp
 			assert(peek() <= end);
 			assert(end <= beginWrite());
 
-			retrieveN(end - peek());
+			retrieve(end - peek());
 		}
 		void retrieveAll()
 		{
 			readIndex_ = kCheapPrepend;
 			writeIndex_ = kCheapPrepend;
 		}
-		std::string retriveAsString(size_t n) {
+		std::string retrieveAsString(size_t n) {
 			assert(n <= readableBytes());
 
 			std::string result(peek(), n);
-			retrieveN(n);
+			retrieve(n);
 			return result;
+		}
+		std::string retrieveAllAsString() {
+			return retrieveAsString(readableBytes());
 		}
 
 		void append(const char* data, size_t len) {
