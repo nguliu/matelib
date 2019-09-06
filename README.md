@@ -1,4 +1,4 @@
-# HighPerformance-server
+# my C++ HighPerformance WebServer
 本项目为C++编写的静态Web服务器，在实现的过程中大量参考了muduo网络库的实现
 
 | Part Ⅰ | Part Ⅱ | Part Ⅲ | Part Ⅳ |
