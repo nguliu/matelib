@@ -1,6 +1,4 @@
 #include "../base/Logging.h"
-#include "../base/Thread.h"
-#include "../base/Timestamp.h"
 #include "../EventLoop.h"
 #include "../Timer.h"
 #include <functional>

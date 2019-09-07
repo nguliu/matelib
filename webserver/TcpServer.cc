@@ -17,16 +17,18 @@ namespace lfp::detail
 {
 	void defaultConnectionCallback(const TcpConnectionShptr& conn)
 	{
-	  SYNC_LOG << "NewConnection [" << conn->localAddress().toIpPort() << "]-["
-			   << conn->peerAddress().toIpPort() << "] is "
-			   << (conn->isConnected() ? "UP" : "DOWN");
+		printf("On defaultConnectionCallback [%s]-[%s] is %s\n",
+				conn->localAddress().toIpPort().c_str(),
+				conn->peerAddress().toIpPort().c_str(),
+				(conn->isConnected() ? "UP" : "DOWN"));
 	}
 
 	void defaultMessageCallback(const TcpConnectionShptr& conn,
 								Buffer* buf,
 								Timestamp time)
 	{
-		printf("Recved %dBytes data from %s at %s\n",
+		
+		printf("On defaultMessageCallback recved %d bytes data from %s at %s\n",
 				static_cast<int>(buf->readableBytes()),
 				conn->peerAddress().toIpPort().c_str(),
 				time.toFormattedString().c_str());
@@ -51,16 +53,17 @@ using namespace lfp;
 TcpServer::TcpServer(EventLoop* mainLoop,
 					 const InetAddress& listenAddr,
 					 int threadNum,
-					 const std::string& serviceName)
+					 const std::string& serverName)
   : started_(false),
   	mainLoop_(mainLoop),
 	idleFd_(::open("/dev/null", O_RDONLY | O_CLOEXEC)),
 	listenSock_(::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP)), //2.6.27以上的内核才支持SOCK_NONBLOCK与SOCK_CLOEXEC
 	acceptChannel_(mainLoop_, listenSock_),													 //若不支持请使用::socket + setNONBLOCKandCLOEXEC
 	hostIpPort_(listenAddr.toIpPort()),
-	serviceName_(serviceName),
+	serverName_(serverName),
 	threadPool_(new EventLoopThreadPool(mainLoop_, threadNum)),
 	nextConnId_(0),
+	threadInitCallback_(),
 	connectionCallback_(&detail::defaultConnectionCallback),
 	messageCallback_(&detail::defaultMessageCallback)
 {
@@ -76,6 +79,7 @@ TcpServer::TcpServer(EventLoop* mainLoop,
 					 static_cast<socklen_t>(sizeof listenAddr));
 	assert(ret == 0);
 
+	//设置连接到来时的回调
 	acceptChannel_.setReadCallback(std::bind(&TcpServer::handleConnection, this));
 }
 
@@ -96,7 +100,7 @@ void TcpServer::start()
 	mainLoop_->assertInLoopThread();
 
 	if (!started_) {
-		SYNC_LOG << "TcpServer::start() [" << serviceName_ << ":" << hostIpPort_ << "] start looping";
+		SYNC_LOG << "TcpServer::start() [" << serverName_ << ":" << hostIpPort_ << "] start looping";
 
 		started_ = true;
 		threadPool_->start(threadInitCallback_);
@@ -128,7 +132,7 @@ void TcpServer::handleConnection()	//用于接受新连接
 			idleFd_ = ::open("/dev/null", O_RDONLY | O_CLOEXEC);
 		}
 		else {
-			SYNC_LOG << "TcpServer::handleConnection(): accept4 error";
+			ASYNC_LOG << "TcpServer::handleConnection(): accept4 error";
 		}
 		return;
 	}
@@ -140,32 +144,28 @@ void TcpServer::handleConnection()	//用于接受新连接
 	char buf[32];
 	snprintf(buf, sizeof buf, " #%d:%s", nextConnId_, peerAddr.toIpPort().c_str());
 	++nextConnId_;
-	std::string connName = serviceName_ + buf;
-	SYNC_LOG << "TcpServer::handleConnection() [" << serviceName_ << ":" << hostIpPort_ << "] NewConnection [" << connName << "]";
+	std::string connName = serverName_ + buf;
+	ASYNC_LOG << "TcpServer::handleConnection() [" << serverName_ << ":" << hostIpPort_ << "] NewConnection [" << connName << "]";
 
 	EventLoop* ioLoop = threadPool_->getNextLoop();
 	TcpConnectionShptr conn(new TcpConnection(this, ioLoop, connfd, connName, localAddr, peerAddr));
 	//这里传入this是为了断开连接是TcpConnection向TcpServer中注册回调removeConnection，已删除列表中的对象
-
+	
 	connectionMap_[connName] = conn;
 	conn->setConnectionCallback(connectionCallback_);
 	conn->setMessageCallback(messageCallback_);
-
 	ioLoop->runInLoop(std::bind(&TcpConnection::connectionEstablished, conn));
 }
 
 void TcpServer::removeConnection(const TcpConnectionShptr& conn)
 {
 	mainLoop_->assertInLoopThread();
-	SYNC_LOG << "TcpServer::removeConnection() [" << conn->name() << "]";
+	ASYNC_LOG << "TcpServer::removeConnection() [" << conn->name() << "]";
 
 	EventLoop* ioLoop = conn->getLoop();
 	
-	printf("[1] conn.use_count=%ld\n", conn.use_count());
 	//将conn从map中删除，conn对象的应用计数减一
 	connectionMap_.erase(conn->name());
-	printf("[2] conn.use_count=%ld\n", conn.use_count());
 	//最后将conn绑定到一个对象，延迟conn的销毁时机
 	ioLoop->queueInLoop(std::bind(&TcpConnection::connectionDestroyed, conn));
-	printf("[3] conn.use_count=%ld\n", conn.use_count());
 }

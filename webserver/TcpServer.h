@@ -9,6 +9,7 @@
 #include "callbacks.h"
 #include "Channel.h"
 #include "InetAddress.h"
+#include "TcpConnection.h"
 #include <memory>
 #include <map>
 #include <string>
@@ -23,19 +24,19 @@ namespace lfp
 	public:
 		TcpServer(EventLoop* mainLoop,
 				  const InetAddress& listenAddr,
-				  int threadNum,
-				  const std::string& serviceName = "TcpServer");
+				  int threadNum = 0,	//默认只使用一个main IO thread
+				  const std::string& serverName = "TcpServer");
 		~TcpServer();
 
 		void start();
 
 		EventLoop* getMainLoop() const { return mainLoop_; }
-		const std::string& name() const { return serviceName_; }
+		const std::string& name() const { return serverName_; }
 		const std::string hostIpPort() const { return hostIpPort_; }
 
 		void setThreadInitCallback(const ThreadInitCallback& cb)
 		{ threadInitCallback_ = cb; }
-		void setConnctionCallback(const ConnectionCallback& cb)
+		void setConnectionCallback(const ConnectionCallback& cb)
 		{connectionCallback_ = cb; }
 		void setMessageCallback(const MessageCallback& cb)
 		{ messageCallback_ = cb; }
@@ -51,7 +52,7 @@ namespace lfp
 		int listenSock_;		//服务端监听的套接字
 		Channel acceptChannel_; //监听套接字所属channel
 		const std::string hostIpPort_;
-		const std::string serviceName_;
+		const std::string serverName_;
 		std::unique_ptr<EventLoopThreadPool> threadPool_;
 		unsigned int nextConnId_;		//下一个连接ID
 		std::map<std::string, TcpConnectionShptr> connectionMap_;

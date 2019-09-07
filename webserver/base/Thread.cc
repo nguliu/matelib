@@ -90,8 +90,6 @@ void* Thread::startThread(void* thread)
 
 void Thread::runInThread() //执行具体任务
 {
-	latch_.countDown();  //新线程已启动，通知启动线程继续执行
-
 	tid_ = CurrentThread::tid();  //获取线程真实ID的同时缓存ID
 	if (name_.empty()) {
 		char buf[128];
@@ -100,6 +98,7 @@ void Thread::runInThread() //执行具体任务
 	}
 	CurrentThread::t_threadName = name_.c_str();
 
+	latch_.countDown();  //新线程已启动，通知启动线程继续执行
 	func_();  //执行任务
 	CurrentThread::t_threadName = "finished";
 }

@@ -10,6 +10,7 @@
 #include "callbacks.h"
 #include "Channel.h"
 #include "InetAddress.h"
+#include "StringPiece.h"
 #include <memory>
 #include <string>
 
@@ -19,7 +20,8 @@ namespace lfp
 	class EventLoop;
 	class TcpServer;
 
-	class TcpConnection : noncopyable, std::enable_shared_from_this<TcpConnection>
+	class TcpConnection : noncopyable,
+						  public std::enable_shared_from_this<TcpConnection>
 	{
 	public:
 		TcpConnection(TcpServer* server,
@@ -37,6 +39,7 @@ namespace lfp
 		const InetAddress& peerAddress() const { return peerAddr_; }
 
 		void send(const void* data, size_t len);
+		void send(const StringPiece& message);
 		void send(Buffer* buffer);
 		void shutdown();
 		
@@ -57,11 +60,12 @@ namespace lfp
 		void handleClose();
 		void handleError();
 
-		void sendInLoop(const std::string message);
-		void sendInLoop(const void* data, size_t len);
+		void sendInLoop(const StringPiece& message);
+		void sendInThread(const void* data, size_t len);
 		void shutdownInLoop();
 
-		bool connected_;
+		bool connected_;	//是否已连接
+		bool needDisconn_;	//是否需要断开
 		TcpServer* server_;	//当前连接所属的TcpServer对象
 		EventLoop* loop_;	//当前连接所属的EventLoop对象
 		MutexLock mutex_;

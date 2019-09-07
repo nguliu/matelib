@@ -27,9 +27,15 @@ namespace detail
 
 __thread char t_time[32];			//保存当前线程格式化的时间（年.月.日-时.分.秒）
 __thread time_t t_lastCache = 0;	//上一次格式化时间的秒
+__thread char t_errnobuf[256];
 
 //这里有一个技巧：在一秒内写入两条日志时，秒及以上的时间都不用再次格式化，因为在一秒之内
 //它们肯定都没有变，在前端线程日志量巨大是对性能有极大地提升。（亲自体会过，血淋淋的教训）
+
+const char* strerror_tl(int savedErrno)
+{
+	return strerror_r(savedErrno, t_errnobuf, sizeof t_errnobuf);
+}
 
 } //end of namespace lfp
 

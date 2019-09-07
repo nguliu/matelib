@@ -8,6 +8,7 @@
 #include "base/MutexLock.h"
 #include "base/noncopyable.h"
 #include "base/Thread.h"
+#include "callbacks.h"
 #include "EventLoop.h"
 #include <functional>
 
@@ -18,8 +19,6 @@ namespace lfp
 	class EventLoopThread : noncopyable
 	{
 	public:
-		typedef std::function<void(EventLoop*)> ThreadInitCallback;
-		
 		EventLoopThread(const ThreadInitCallback& cb = ThreadInitCallback());
 		~EventLoopThread();
 

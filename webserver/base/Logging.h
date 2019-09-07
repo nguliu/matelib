@@ -54,6 +54,9 @@ namespace lfp
 //停止异步日志线程
 #define ASYNCLOG_STOP Singleton<AsyncLogging>::instance().stop()
 
+//根据savedErrno返回错误描述
+const char* strerror_tl(int savedErrno);
+
 } //end of namespace lfp
 
 #endif //end of WEBSERVER_BASE_LOGGING_H

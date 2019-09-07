@@ -5,6 +5,7 @@
 #define WEBSERVER_BUFFER_H
 
 #include "base/copyable.h"
+#include "StringPiece.h"
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -97,6 +98,10 @@ namespace lfp
 		}
 		std::string retrieveAllAsString() {
 			return retrieveAsString(readableBytes());
+		}
+
+		void append(const StringPiece& str) {
+			append(str.data(), str.size());
 		}
 
 		void append(const char* data, size_t len) {

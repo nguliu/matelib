@@ -13,6 +13,7 @@ namespace CurrentThread
 	extern __thread char t_tidString[32];
 	extern __thread const char* t_threadName;
 
+	//缓存当前线程的tid，在Thread.cc实现
 	void cachedId();
 
 	inline int tid()

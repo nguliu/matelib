@@ -45,11 +45,11 @@ namespace lfp
 		void assertInLoopThread();
 
 		static EventLoop* getEventLoopOfCurrentThread();
+		bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); }
 
 	private:
 		void handleRead();
 		void doPendingFunctors();
-		bool isInLoopThread() const { return threadId_ == CurrentThread::tid(); }
 
 		typedef std::vector<Channel*> ChannelList;
 

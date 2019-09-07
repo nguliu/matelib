@@ -5,6 +5,7 @@
 #define WEBSERVER_EVENTLOOPTHREADPOOL_H
 
 #include "base/noncopyable.h"
+#include "callbacks.h"
 #include <functional>
 #include <memory>
 #include <vector>
@@ -16,9 +17,7 @@ namespace lfp
 
 	class EventLoopThreadPool : noncopyable
 	{
-	public:
-		typedef std::function<void(EventLoop*)> ThreadInitCallback;
-		
+	public:		
 		EventLoopThreadPool(EventLoop* baseloop, int threadNum);
 		~EventLoopThreadPool();
 

@@ -12,5 +12,3 @@ set(base_SRCS
 
 add_library(webserver_base ${base_SRCS})
 target_link_libraries(webserver_base pthread rt)
-
-set_target_properties(webserver_base PROPERTIES OUTPUT_NAME "webserver_base")

@@ -22,7 +22,7 @@ namespace lfp::detail
 	//线程私有数据，对于IO线程指向其EventLoop对象
 	__thread EventLoop* t_loopInThisThread = nullptr;
 
-	const int kEpollWaitTimeMS = 10 * 1000;	 //epoll查询阻塞时间
+	const int kEpollWaitTimeMS = 20 * 1000;	 //epoll查询阻塞时间
 
 	int createEventfd() {
 		int evfd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
@@ -41,7 +41,7 @@ namespace lfp::detail
 			::signal(SIGPIPE, SIG_IGN);
 			::signal(SIGCHLD, SIG_IGN);
 
-			SYNC_LOG << "Ignore signal SIGPIPE and SIGCHLD";
+			ASYNC_LOG << "Ignore signal SIGPIPE and SIGCHLD";
 		}
 	};
 
