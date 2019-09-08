@@ -15,14 +15,14 @@
 ./bin/httpserver_test 
 ## Technical Points
 - 使用Epoll边沿触发的IO多路复用技术实现Reactor模式，使用非阻塞IO+应用层缓冲区
-- 使用IO thread pool和compute thread pool充分发挥多核CPU性能，每个IO线程一个event loop（即one loop per thred）
+- 使用IO thread pool + compute thread pool充分发挥多核CPU性能，每个IO线程一个event loop（即one loop per thred）
 - 线程模型将划分为主线程、IO线程和worker线程，主线程接收客户端连接（accept），并通过Round-Robin策略分发给IO线程，IO线程负责连接管理（即事件监听和读写操作），worker线程负责业务计算任务（即对数据进行处理，应用层处理复杂的时候可以开启）
 - 使用双缓冲区实现异步日志系统，避免生产者线程写磁盘的开销。另外，通过时间驱动或文件大小驱动实现日志文件的滚动
 - 使用eventfd实现了线程的异步唤醒
 - 为了避免内存泄漏，使用了智能指针等RAII机制管理对象资源
 - 使用有线状态机解析HTTP请求，支持HTTP长连接
 - 支持优雅关闭连接
-## 并发模型如下
+## Concurrent model
 ![Image text](https://github.com/Canna011/myWebServer/blob/master/dec%26img/IO%E6%A8%A1%E5%9E%8B.png) 
 其中，mainReadtor只负责accept新客户端的连接（如果只有mainReactor它也负责IO和compute），mainReactor建立一个新连接之后采用Round-Robin方式将其分发给
 其他sub Reactor，每个连接只属于一个Reactor，由所属线程负责IO和compute。
