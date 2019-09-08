@@ -11,8 +11,12 @@
 - Kernel: 5.0.0-27-generic
 - Complier: g++ 7.4.0
 ## Build and run
-./build.sh
-./bin/httpserver_test
+./build.sh 
+./bin/httpserver_test 
+## Technical Points
+- 使用Epoll边沿触发的IO多路复用技术实现Reactor模式，使用非阻塞IO
+- 使用双缓冲区实现异步日志系统，减小生产者线程的开销
+## 并发模型如下
 
 ## Other
 - [性能测试]()
