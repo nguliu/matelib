@@ -1,0 +1,162 @@
+// @author: LiuFangPing
+// @github: https://github.com/inmail
+// @csdn: https://blog.csdn.net/qq_40843865
+
+#ifndef MATELIB_BUFFER_H
+#define MATELIB_BUFFER_H
+
+#include "base/copyable.h"
+#include "StringPiece.h"
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <assert.h>
+
+namespace lfp
+{
+	//Buffer主要用于异步IO的应用层缓冲区
+	
+	//注意：由于Buffer采用了惰性删除，所以使用peek()打印数据是不正确的，正确的做法是
+	//		使用 string str(buf.peek(), buf.readableBytes()) 将其构成字符串再打印
+
+	class Buffer : copyable
+	{
+	public:
+		static const size_t kCheapPrepend = 8;
+		static const size_t kInitialSize = 1024;
+
+		Buffer()
+		  : buffer_(kCheapPrepend + kInitialSize),
+			readIndex_(kCheapPrepend),
+			writeIndex_(kCheapPrepend)
+		{
+		}
+
+		void swap(Buffer& rhs) {
+			buffer_.swap(rhs.buffer_);
+			std::swap(readIndex_, rhs.readIndex_);
+			std::swap(writeIndex_, rhs.writeIndex_);
+		}
+
+		size_t readableBytes() const {
+			return writeIndex_ - readIndex_;
+		}
+		size_t writableBytes() const {
+			return buffer_.size() - writeIndex_;
+		}
+		size_t prependableBytes() const {
+			return readIndex_;
+		}
+
+		const char* peek() const {
+			return &*buffer_.begin() + readIndex_;
+		}
+
+		char* beginWrite() {
+			return &*buffer_.begin() + writeIndex_;
+		}
+
+		const char* beginWrite() const {
+			return &*buffer_.begin() + writeIndex_;
+		}
+
+
+		const char* findCRLF() const {
+			const char* crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
+			return crlf == beginWrite() ? nullptr : crlf;
+		}
+		const char* findCRLF(const char* start) const {
+			assert(peek() <= start);
+			assert(start <= beginWrite());
+
+			const char* crlf = std::search(start, beginWrite(), kCRLF, kCRLF + 2);
+			return crlf == beginWrite() ? nullptr : crlf;
+		}
+		const char* findStr(const char* first, size_t len) const
+		{
+			const char* res = std::search(peek(), beginWrite(), first, first + len);
+			return res == beginWrite() ? nullptr : res;
+		}
+
+
+		void retrieve(size_t n) {
+			assert(n <= readableBytes());
+
+			if (n < readableBytes()) {
+				readIndex_ += n;
+			}
+			else {
+				retrieveAll();
+			}
+		}
+		void retrieveUntil(const char* end)
+		{
+			assert(peek() <= end);
+			assert(end <= beginWrite());
+
+			retrieve(end - peek());
+		}
+		void retrieveAll()
+		{
+			readIndex_ = kCheapPrepend;
+			writeIndex_ = kCheapPrepend;
+		}
+		std::string retrieveAsString(size_t n) {
+			assert(n <= readableBytes());
+
+			std::string result(peek(), n);
+			retrieve(n);
+			return result;
+		}
+		std::string retrieveAllAsString() {
+			return retrieveAsString(readableBytes());
+		}
+
+		void append(const StringPiece& str) {
+			append(str.data(), str.size());
+		}
+
+		void append(const char* data, size_t len) {
+			ensureWritableBytes(len);
+			std::copy(data, data + len, beginWrite());
+			writeIndex_ += len;
+		}
+		void append(const void* data, size_t len)
+		{
+			append(static_cast<const char*>(data), len);
+		}
+
+		void erase(const char* start, size_t len)
+		{
+			assert(peek() <= start);
+			assert(start + len <= beginWrite());
+
+			if (start == peek()) {
+				retrieve(len);
+			}
+			else {
+				std::vector<char>::iterator begin = buffer_.begin() + (start - &*buffer_.begin());
+				std::vector<char>::iterator end = begin + len;
+				buffer_.erase(begin, end);
+				writeIndex_ -= len;
+			}
+		}
+		void erase(const char* start, const char* end) {
+			erase(start, end - start);
+		}
+
+		ssize_t readFd(int fd, int* savedErrno);
+
+	private:
+		void ensureWritableBytes(size_t len);
+
+		std::vector<char> buffer_;		//以vector作为底层数据容器
+		size_t readIndex_;
+		size_t writeIndex_;
+		
+		static const char kCRLF[];
+	};
+
+} // namespace lfp
+
+#endif // !MATELIB_BUFFER_H
