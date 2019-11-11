@@ -10,7 +10,7 @@ set(CXX_FLAGS
     -g
     -Wall
 	-Werror
-    -std=c++11
+    -std=c++14
     -D_PTHREADS
     -Wno-unused-parameter
 )
