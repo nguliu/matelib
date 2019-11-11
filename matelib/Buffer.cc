@@ -17,7 +17,7 @@ const char Buffer::kCRLF[] = "\r\n";
 //而大多数时候，这些缓冲区的使用率很低
 ssize_t Buffer::readFd(int fd, int* savedErrno)
 {
-	const size_t writable = writableBytes();
+	const size_t writable = writeableBytes();
 
     // 节省一次ioctl系统调用（获取有多少可读数据）
     char extrabuf[65536];
@@ -52,9 +52,9 @@ ssize_t Buffer::readFd(int fd, int* savedErrno)
 
 void Buffer::ensureWritableBytes(size_t len)
 {
-	if (writableBytes() < len)
+	if (writeableBytes() < len)
 	{
-		if (writableBytes() + prependableBytes() < len + kCheapPrepend)
+		if (writeableBytes() + prependableBytes() < len + kCheapPrepend)
 		{
 			//如果所有空闲区域都不够则直接扩大
 			buffer_.resize(writeIndex_ + len);

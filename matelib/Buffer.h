@@ -14,10 +14,9 @@
 
 namespace lfp
 {
-	//Buffer主要用于异步IO的应用层缓冲区
-	
-	//注意：由于Buffer采用了惰性删除，所以使用peek()打印数据是不正确的，正确的做法是
-	//		使用 string str(buf.peek(), buf.readableBytes()) 将其构成字符串再打印
+	//注意使用Buffer时的陷阱：
+	//	  由于Buffer采用了惰性删除，所以使用peek()打印数据是不正确的，正确的做法是
+	//	  使用 string str(buf.peek(), buf.readableBytes()) 将其构成字符串再打印
 
 	class Buffer : copyable
 	{
@@ -25,11 +24,34 @@ namespace lfp
 		static const size_t kCheapPrepend = 8;
 		static const size_t kInitialSize = 1024;
 
-		Buffer()
+		Buffer()	//默认构造函数
 		  : buffer_(kCheapPrepend + kInitialSize),
 			readIndex_(kCheapPrepend),
 			writeIndex_(kCheapPrepend)
 		{
+		}
+		Buffer(const Buffer& rhs)	//拷贝构造函数
+		  : buffer_(kCheapPrepend + kInitialSize + rhs.readableBytes()),
+			readIndex_(kCheapPrepend),
+			writeIndex_(kCheapPrepend)
+		{
+			append(rhs.peek(), rhs.readableBytes());
+			//将rhs的数据追加到当前对象，会有内存拷贝
+		}
+		Buffer(Buffer&& rhs)	//移动拷贝构造函数
+		  : buffer_(kCheapPrepend + kInitialSize),
+			readIndex_(kCheapPrepend),
+			writeIndex_(kCheapPrepend)
+		{
+			this->swap(rhs);
+			//将这里使用swap进行移动拷贝，不会有内存拷贝
+		}
+		Buffer(const char* data, size_t len)
+		  : buffer_(kCheapPrepend + kInitialSize),
+			readIndex_(kCheapPrepend),
+			writeIndex_(kCheapPrepend)
+		{
+			append(data, len);
 		}
 
 		void swap(Buffer& rhs) {
@@ -41,26 +63,34 @@ namespace lfp
 		size_t readableBytes() const {
 			return writeIndex_ - readIndex_;
 		}
-		size_t writableBytes() const {
+		size_t writeableBytes() const {
 			return buffer_.size() - writeIndex_;
 		}
 		size_t prependableBytes() const {
 			return readIndex_;
 		}
 
+		char* data() {
+			return &*(buffer_.begin() + kCheapPrepend);
+		}
+		const char* data() const {
+			return &*(buffer_.begin() + kCheapPrepend);
+		}
 		const char* peek() const {
-			return &*buffer_.begin() + readIndex_;
+			return &*(buffer_.begin() + readIndex_);
 		}
 
 		char* beginWrite() {
-			return &*buffer_.begin() + writeIndex_;
+			return &*(buffer_.begin() + writeIndex_);
 		}
 
 		const char* beginWrite() const {
-			return &*buffer_.begin() + writeIndex_;
+			return &*(buffer_.begin() + writeIndex_);
 		}
 
-
+		const char* findc(char c) const {
+			return findStr(&c, 1);
+		}
 		const char* findCRLF() const {
 			const char* crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
 			return crlf == beginWrite() ? nullptr : crlf;
@@ -74,6 +104,8 @@ namespace lfp
 		}
 		const char* findStr(const char* first, size_t len) const
 		{
+			assert(len <= readableBytes());
+
 			const char* res = std::search(peek(), beginWrite(), first, first + len);
 			return res == beginWrite() ? nullptr : res;
 		}
@@ -115,7 +147,6 @@ namespace lfp
 		void append(const StringPiece& str) {
 			append(str.data(), str.size());
 		}
-
 		void append(const char* data, size_t len) {
 			ensureWritableBytes(len);
 			std::copy(data, data + len, beginWrite());
@@ -143,6 +174,11 @@ namespace lfp
 		}
 		void erase(const char* start, const char* end) {
 			erase(start, end - start);
+		}
+
+		void clear() {
+			::memset(data(), '\0', writeIndex_ - kCheapPrepend);	//清空[kCheapPrepend, writeIndex_)内的数据
+			retrieveAll();
 		}
 
 		ssize_t readFd(int fd, int* savedErrno);
