@@ -1,5 +1,4 @@
 **A simple and easy to use high performance C + + Network Library**  
-[![Build Status](https://travis-ci.org/inmail/matelib.svg?branch=master)](https://travis-ci.org/inmail/matelib)
 ##  
 ## Introduction
 本项目为C++11编写的（RPC实现中使用了少量的C++14特性）基于epoll的多线程服务端网络库，在实现的过程中参考了[muduo网络库](https://github.com/chenshuo/muduo)、[libevent网络库](https://github.com/libevent/libevent)和网上许多优秀的博客、开源项目等，该库的主要作用是运用Linux系统调用处理网络连接、网络IO、日志记录、定时器等相关编程细节，使用该库可以使编程人员脱离服务端编程中与操作系统接轨的细节，只需要实现应用层业务逻辑并设置几个相应的事件处理函数即可。另外，实现了高效的异步日志系统，支持日志文件滚动等功能，应用层实现了简易的HTTP服务器和RPC服务器，另外可基于底层框架实现其他应用层服务。
@@ -29,5 +28,5 @@
 - 基于网络传输服务实现RPC服务，对参数和函数调用结果序列化传输和反序列化，支持远程自由函数、成员函数的调用
 ## Concurrent Model
 ![Image text](https://github.com/Canna011/myWebServer/blob/master/dec%26img/IO%E6%A8%A1%E5%9E%8B.png) 
-其中，mainReadtor只负责accept新客户端的连接（如果只有mainReactor它也负责IO和compute），mainReactor建立一个新连接之后采用Round-Robin方式将其分发给
-其他sub Reactor，每个连接只属于一个Reactor，由所属线程负责IO和compute。
+其中，mainReadtor只负责accept新客户端的连接（如果只有mainReactor它也负责网络IO和业务处理），mainReactor建立一个新连接之后采用Round-Robin方式将其分发给其他subReactor，每个连接只属于一个Reactor，由所属线程负责IO和业务处理。
+## Performance Test
