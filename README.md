@@ -1,4 +1,4 @@
-**A simple and easy to use high performance C + + Network Library**
+**A simple and easy to use high performance C + + Network Library**  
 [![Build Status](https://travis-ci.org/inmail/matelib.svg?branch=master)](https://travis-ci.org/inmail/matelib)
 ##  
 ## Introduction
