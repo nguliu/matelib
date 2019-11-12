@@ -1,4 +1,5 @@
-# 
+##  
+**A simple and easy to use high performance C + + Network Library**
 ## Introduce
 本项目为C++11编写的基于Epoll LT模式的多线程服务器，在实现的过程中参考了muduo网络库、libevent网络库和网上许多优秀的博客、开源项目等，支持同步日志和异步日志记录服务器状态，应用层使用有限状态机对HTTP的GET和HEAD方法进行解析，支持静态资源的获取和HTTP长连接，另外可基于底层框架实现其他应用层协议。
 ## Project purposes
@@ -26,6 +27,3 @@
 ![Image text](https://github.com/Canna011/myWebServer/blob/master/dec%26img/IO%E6%A8%A1%E5%9E%8B.png) 
 其中，mainReadtor只负责accept新客户端的连接（如果只有mainReactor它也负责IO和compute），mainReactor建立一个新连接之后采用Round-Robin方式将其分发给
 其他sub Reactor，每个连接只属于一个Reactor，由所属线程负责IO和compute。
-## Other
-- [性能测试]()
-- [历史版本分析]()
