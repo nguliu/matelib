@@ -1,12 +1,7 @@
-## matelib
 **A simple and easy to use high performance C + + Network Library**
 ##  
 ## Introduction
-本项目为C++11编写的（RPC实现中使用了少量的C++14特性）基于epoll的多线程服务端网络库，在实现的过程中参考了[muduo网络库]
-(https://github.com/chenshuo/muduo)、[libevent网络库](https://github.com/libevent/libevent)和网上许多优秀的博客、开源项目等，该库的主要作用是运
-用Linux系统调用处理网络连接、网络IO、日志记录、定时器等相关编程细节，使用该库可以使编程人员脱离服务端编程中与操作系统接轨的细节，只需要实现应用层业务逻
-辑并设置几个相应的事件处理函数即可。另外，实现了高效的异步日志系统，支持日志文件滚动等功能，应用层实现了简易的HTTP服务器和RPC服务器，另外可基于底层框架
-实现其他应用层服务。
+本项目为C++11编写的（RPC实现中使用了少量的C++14特性）基于epoll的多线程服务端网络库，在实现的过程中参考了[muduo网络库](https://github.com/chenshuo/muduo)、[libevent网络库](https://github.com/libevent/libevent)和网上许多优秀的博客、开源项目等，该库的主要作用是运用Linux系统调用处理网络连接、网络IO、日志记录、定时器等相关编程细节，使用该库可以使编程人员脱离服务端编程中与操作系统接轨的细节，只需要实现应用层业务逻辑并设置几个相应的事件处理函数即可。另外，实现了高效的异步日志系统，支持日志文件滚动等功能，应用层实现了简易的HTTP服务器和RPC服务器，另外可基于底层框架实现其他应用层服务。
 ## Project Purpose
 在之前学习了许多优秀书籍后，对C++、Linux环境编程、网络编程有了一定的理论知识储备，但实践应用偏少，在后来学习了muduo网络库和陈硕的Linux多线程服务端编
 程，于是决定开始动手进行实践，也是对之前的理论知识进行巩固和应用。
